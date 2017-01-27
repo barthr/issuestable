@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"strings"
 
-	"golang.org/x/oauth2"
-
 	"github.com/google/go-github/github"
 	"github.com/olekukonko/tablewriter"
 )
@@ -18,11 +16,7 @@ var (
 	amount = flag.Int("amount", 50, "Set the maximum amount of issues to show")
 	repo   = flag.String("repo", "", "Repository on http://www.github.com to list the issues from")
 
-	ts = oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: "deae97edd03c751238ed236b04c7e67f991983ca"},
-	)
-	tc     = oauth2.NewClient(oauth2.NoContext, ts)
-	client = github.NewClient(tc)
+	client = github.NewClient(nil)
 )
 
 func main() {
