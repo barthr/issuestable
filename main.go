@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"golang.org/x/oauth2"
+
 	"github.com/google/go-github/github"
 	"github.com/olekukonko/tablewriter"
 )
@@ -16,10 +18,15 @@ var (
 	amount = flag.Int("amount", 50, "Set the maximum amount of issues to show")
 	repo   = flag.String("repo", "", "Repository on http://www.github.com to list the issues from")
 
-	client = github.NewClient(nil)
+	ts = oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: "deae97edd03c751238ed236b04c7e67f991983ca"},
+	)
+	tc     = oauth2.NewClient(oauth2.NoContext, ts)
+	client = github.NewClient(tc)
 )
 
 func main() {
+
 	flag.Usage = func() {
 		fmt.Println("Usage of Issues table")
 		flag.PrintDefaults()
@@ -55,7 +62,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	for currentPage := 0; currentPage < page.LastPage && len(issues) != *amount; currentPage++ {
+	for currentPage := 0; currentPage < page.LastPage && len(issues) <= *amount; currentPage++ {
 		pageAmount := github.ListOptions{Page: currentPage, PerPage: 100}
 		pageOptions.ListOptions = pageAmount
 		newIssues, _, err := client.Issues.ListByRepo(path[1], path[2], pageOptions)
@@ -71,15 +78,19 @@ func main() {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"number", "created_at", "title"})
+	table.SetHeader([]string{"index", "number", "created_at", "title"})
 
-	for _, issue := range issues {
-		row := make([]string, 3)
-		row[0] = strconv.Itoa(*issue.Number)
-		row[1] = issue.CreatedAt.String()
-		row[2] = *issue.Title
+	for index, issue := range issues {
+		if index == *amount {
+			break
+		}
+		row := make([]string, 4)
+		row[0] = strconv.Itoa(index)
+		row[1] = strconv.Itoa(*issue.Number)
+		row[2] = issue.CreatedAt.String()
+		row[3] = *issue.Title
 		table.Append(row)
 	}
-
+	table.SetRowLine(true)
 	table.Render()
 }
