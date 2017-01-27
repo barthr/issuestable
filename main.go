@@ -53,17 +53,19 @@ func main() {
 
 	issues, page, err := client.Issues.ListByRepo(path[1], path[2], nil)
 
-	for currentPage := 0; currentPage < page.LastPage && len(issues) != *amount; currentPage++ {
-		pageAmount := github.ListOptions{Page: currentPage, PerPage: 100}
-		pageOptions.ListOptions = pageAmount
-		newIssues, _, _ := client.Issues.ListByRepo(path[1], path[2], pageOptions)
-
-		issues = append(issues, newIssues...)
-	}
-
 	if err != nil {
 		fmt.Printf("Cannot find issues for repo %s/%s because %v", path[1], path[2], err)
 		os.Exit(1)
+	}
+
+	for currentPage := 0; currentPage < page.LastPage && len(issues) != *amount; currentPage++ {
+		pageAmount := github.ListOptions{Page: currentPage, PerPage: 100}
+		pageOptions.ListOptions = pageAmount
+		newIssues, _, err := client.Issues.ListByRepo(path[1], path[2], pageOptions)
+
+		if err == nil {
+			issues = append(issues, newIssues...)
+		}
 	}
 
 	if len(issues) == 0 {
