@@ -1,18 +1,15 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"net/url"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/google/go-github/github"
 	"github.com/olekukonko/tablewriter"
-
-	"flag"
-
-	"os"
-
-	"net/url"
 )
 
 var (
