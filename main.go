@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"strconv"
@@ -13,14 +14,13 @@ import (
 )
 
 var (
-	amount = flag.Int("amount", 50, "Set the maximum amount of issues to show")
+	amount = flag.Int("amount", -1, "Set the maximum amount of issues to show")
 	repo   = flag.String("repo", "", "Repository on http://www.github.com to list the issues from")
 
 	client = github.NewClient(nil)
 )
 
 func main() {
-
 	flag.Usage = func() {
 		fmt.Println("Usage of Issues table")
 		flag.PrintDefaults()
@@ -47,23 +47,22 @@ func main() {
 		os.Exit(1)
 	}
 
-	pageOptions := &github.IssueListByRepoOptions{}
-
-	issues, page, err := client.Issues.ListByRepo(path[1], path[2], nil)
-
-	if err != nil {
-		fmt.Printf("Cannot find issues for repo %s/%s because %v", path[1], path[2], err)
-		os.Exit(1)
+	opt := &github.IssueListByRepoOptions{
+		ListOptions: github.ListOptions{PerPage: 100},
 	}
+	var issues []*github.Issue
 
-	for currentPage := 0; currentPage < page.LastPage && len(issues) <= *amount; currentPage++ {
-		pageAmount := github.ListOptions{Page: currentPage, PerPage: 100}
-		pageOptions.ListOptions = pageAmount
-		newIssues, _, err := client.Issues.ListByRepo(path[1], path[2], pageOptions)
-
-		if err == nil {
-			issues = append(issues, newIssues...)
+	for len(issues) <= *amount || *amount < 0 {
+		newIssues, resp, err := client.Issues.ListByRepo(path[1], path[2], opt)
+		if err != nil {
+			log.Fatalf("error fetching issues for %v/%v: %v", path[1], path[2], err)
 		}
+
+		issues = append(issues, newIssues...)
+		if resp.NextPage == 0 {
+			break
+		}
+		opt.ListOptions.Page = resp.NextPage
 	}
 
 	if len(issues) == 0 {
