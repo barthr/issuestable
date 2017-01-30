@@ -4,7 +4,7 @@
 
 ## Introduction
 
-This is the code for the ascii table viewer, the blog post can be found here: https://blog.bartfokker.nl/identicon/
+This is the code for the ascii table viewer, the blog post can be found here: https://blog.bartfokker.nl/issue-table/
 
 
 ## go get to get the package
