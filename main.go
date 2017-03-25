@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"golang.org/x/net/context"
+
 	"github.com/google/go-github/github"
 	"github.com/olekukonko/tablewriter"
 )
@@ -53,7 +55,7 @@ func main() {
 	var issues []*github.Issue
 
 	for len(issues) <= *amount || *amount < 0 {
-		newIssues, resp, err := client.Issues.ListByRepo(path[1], path[2], opt)
+		newIssues, resp, err := client.Issues.ListByRepo(context.Background(), path[1], path[2], opt)
 		if err != nil {
 			log.Fatalf("error fetching issues for %v/%v: %v", path[1], path[2], err)
 		}
