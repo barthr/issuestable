@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -8,8 +9,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"golang.org/x/net/context"
 
 	"github.com/google/go-github/github"
 	"github.com/olekukonko/tablewriter"
@@ -73,18 +72,17 @@ func main() {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"index", "number", "created_at", "title"})
+	table.SetHeader([]string{"number", "created_at", "title"})
 
 	for index, issue := range issues {
 		if index == *amount {
 			break
 		}
-		row := make([]string, 4)
-		row[0] = strconv.Itoa(index)
-		row[1] = strconv.Itoa(*issue.Number)
-		row[2] = issue.CreatedAt.String()
-		row[3] = *issue.Title
-		table.Append(row)
+		column := make([]string, 3)
+		column[0] = strconv.Itoa(*issue.Number)
+		column[1] = issue.CreatedAt.String()
+		column[2] = *issue.Title
+		table.Append(column)
 	}
 	table.SetRowLine(true)
 	table.Render()
